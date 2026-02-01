@@ -100,10 +100,13 @@ Return ONLY a strict JSON array of items with fields:
 ]
 No extra text, no markdown.`;
 
-  const response = await fetch(
-    process.env.PERPLEXITY_API_URL ??
-      "https://api.perplexity.ai/chat/completions",
-    {
+  const baseUrl =
+    process.env.PERPLEXITY_API_URL ?? "https://api.perplexity.ai";
+  const endpoint = baseUrl.endsWith("/chat/completions")
+    ? baseUrl
+    : `${baseUrl.replace(/\/$/, "")}/chat/completions`;
+
+  const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -117,8 +120,7 @@ No extra text, no markdown.`;
         ],
         temperature: 0.2,
       }),
-    }
-  );
+    });
 
   if (!response.ok) {
     const errorText = await response.text();
