@@ -141,18 +141,7 @@ No extra text, no markdown.`;
     "";
 
   const extracted = extractJsonArray(content);
-  if (!extracted) {
-    return NextResponse.json(
-      {
-        error: "Unable to parse Perplexity response.",
-        errorType: "perplexity",
-        raw: content,
-      },
-      { status: 500 }
-    );
-  }
-
-  const normalized = extracted
+  const normalized = (extracted ?? [])
     .map((item: Partial<Snippet>) => ({
       title: String(item.title ?? "").trim(),
       snippet: String(item.snippet ?? "").trim(),
@@ -161,7 +150,38 @@ No extra text, no markdown.`;
     }))
     .filter((item: Snippet) => item.title && item.snippet && item.url);
 
-  const deduped = dedupeSnippets(normalized);
+  const fallbackResults = Array.isArray(payload?.search_results)
+    ? payload.search_results
+        .map(
+          (item: {
+            title?: string;
+            snippet?: string;
+            url?: string;
+            last_updated?: string;
+            date?: string;
+          }) => ({
+            title: String(item.title ?? "").trim(),
+            snippet: String(item.snippet ?? "").trim(),
+            url: String(item.url ?? "").trim(),
+            publishedAt: String(item.last_updated ?? item.date ?? "").trim(),
+          })
+        )
+        .filter((item: Snippet) => item.title && item.url)
+    : [];
+
+  const deduped = dedupeSnippets(
+    normalized.length ? normalized : fallbackResults
+  );
+
+  if (!deduped.length) {
+    return NextResponse.json(
+      {
+        error: "Perplexity returned no usable snippets.",
+        errorType: "perplexity",
+      },
+      { status: 502 }
+    );
+  }
 
   return NextResponse.json({ snippets: deduped });
 }
