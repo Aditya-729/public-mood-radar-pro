@@ -89,6 +89,7 @@ export default async function handler(
   const apiKey = process.env.MINO_API_KEY;
   const apiUrl = process.env.MINO_API_URL;
   const model = process.env.MINO_MODEL ?? "mino-latest";
+  const agentUrl = process.env.MINO_AGENT_URL ?? "https://example.com";
 
   if (!apiKey || !apiUrl) {
     return res.status(500).json({
@@ -134,16 +135,28 @@ ${JSON.stringify({
 No markdown, no extra keys.`;
 
   try {
+    const isAutomationEndpoint =
+      apiUrl.includes("/automation/run") || apiUrl.includes("/automation/run-sse");
+
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+        ...(isAutomationEndpoint
+          ? { "X-API-Key": apiKey }
+          : { Authorization: `Bearer ${apiKey}` }),
       },
-      body: JSON.stringify({
-        model,
-        prompt,
-      }),
+      body: JSON.stringify(
+        isAutomationEndpoint
+          ? {
+              url: agentUrl,
+              goal: prompt,
+            }
+          : {
+              model,
+              prompt,
+            }
+      ),
     });
 
     if (!response.ok) {
@@ -155,10 +168,48 @@ No markdown, no extra keys.`;
 
     const rawText = await response.text();
     let parsed;
-    try {
-      parsed = JSON.parse(rawText);
-    } catch {
-      parsed = extractJsonObject(rawText);
+
+    if (isAutomationEndpoint) {
+      try {
+        const automationJson = JSON.parse(rawText) as {
+          status?: string;
+          result?: unknown;
+          resultJson?: unknown;
+          error?: { message?: string };
+        };
+        parsed = automationJson.resultJson ?? automationJson.result;
+        if (!parsed && automationJson.status && automationJson.status !== "COMPLETED") {
+          return res.status(502).json({
+            error: "Mino automation did not complete.",
+            errorType: "mino",
+            details: automationJson,
+          });
+        }
+      } catch {
+        const events = rawText
+          .split("\n")
+          .map((line) => line.trim())
+          .filter((line) => line.startsWith("data:"))
+          .map((line) => line.replace(/^data:\s*/, ""));
+        const lastComplete = events
+          .map((payload) => {
+            try {
+              return JSON.parse(payload);
+            } catch {
+              return null;
+            }
+          })
+          .filter(Boolean)
+          .reverse()
+          .find((event: { type?: string }) => event?.type === "COMPLETE");
+        parsed = lastComplete?.resultJson ?? null;
+      }
+    } else {
+      try {
+        parsed = JSON.parse(rawText);
+      } catch {
+        parsed = extractJsonObject(rawText);
+      }
     }
 
     if (!parsed) {
