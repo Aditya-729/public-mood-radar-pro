@@ -602,56 +602,54 @@ export default function Home() {
                     ))}
                   </div>
                 ) : null}
-                {results.opportunities.map((opportunity) => (
-                  <motion.div
-                    key={opportunity.title}
-                    className="rounded-2xl border border-white/10 bg-white/5 p-4"
-                    whileHover={{ y: -6, rotateX: 2, rotateY: -2 }}
-                  >
-                    {(() => {
-                      const sources = opportunityEvidence.get(opportunity.title) ?? [];
-                      return (
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold text-white">
-                        {opportunity.title}
-                      </p>
-                      <Badge className="bg-white/10 text-white/80">
-                        {opportunity.newness}
-                      </Badge>
-                    </div>
-                    <p className="mt-2 text-xs text-white/70">
-                      {opportunity.description}
-                    </p>
-                    <div className="mt-3 text-xs text-white/50">
-                      {opportunity.platformFit} · {opportunity.audienceAngle}
-                    </div>
-                    {sources.length ? (
-                      <div className="mt-3 space-y-1 text-xs text-white/60">
-                        <p className="text-[10px] uppercase tracking-wider text-white/40">
-                          Source signals
+                {results.opportunities.map((opportunity) => {
+                  const sources = opportunityEvidence.get(opportunity.title) ?? [];
+                  return (
+                    <motion.div
+                      key={opportunity.title}
+                      className="rounded-2xl border border-white/10 bg-white/5 p-4"
+                      whileHover={{ y: -6, rotateX: 2, rotateY: -2 }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-white">
+                          {opportunity.title}
                         </p>
-                        {sources.slice(0, 2).map((source) => (
-                          <a
-                            key={source.url}
-                            href={source.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="block truncate hover:text-white"
-                          >
-                            {source.title}
-                          </a>
-                        ))}
-                        {sources.length > 2 ? (
-                          <p className="text-[10px] text-white/40">
-                            +{sources.length - 2} more sources
-                          </p>
-                        ) : null}
+                        <Badge className="bg-white/10 text-white/80">
+                          {opportunity.newness}
+                        </Badge>
                       </div>
-                    ) : null}
-                      );
-                    })()}
-                  </motion.div>
-                ))}
+                      <p className="mt-2 text-xs text-white/70">
+                        {opportunity.description}
+                      </p>
+                      <div className="mt-3 text-xs text-white/50">
+                        {opportunity.platformFit} · {opportunity.audienceAngle}
+                      </div>
+                      {sources.length ? (
+                        <div className="mt-3 space-y-1 text-xs text-white/60">
+                          <p className="text-[10px] uppercase tracking-wider text-white/40">
+                            Source signals
+                          </p>
+                          {sources.slice(0, 2).map((source) => (
+                            <a
+                              key={source.url}
+                              href={source.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="block truncate hover:text-white"
+                            >
+                              {source.title}
+                            </a>
+                          ))}
+                          {sources.length > 2 ? (
+                            <p className="text-[10px] text-white/40">
+                              +{sources.length - 2} more sources
+                            </p>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </motion.div>
+                  );
+                })}
                 {results.gaps.map((gap) => (
                   <motion.div
                     key={gap.gap}
@@ -688,63 +686,61 @@ export default function Home() {
                     ))}
                   </div>
                 ) : null}
-                {results.scored.map((score) => (
-                  <motion.div
-                    key={score.title}
-                    className="rounded-2xl border border-white/10 bg-white/5 p-4"
-                    whileHover={{ y: -6, rotateX: 2, rotateY: -2 }}
-                  >
-                    {(() => {
-                      const sources = opportunityEvidence.get(score.title) ?? [];
-                      return (
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold text-white">{score.title}</p>
-                      <Badge
-                        className={cn(
-                          "bg-white/10 text-white/80",
-                          score.score >= 80 && "animate-pulse"
-                        )}
-                      >
-                        {score.score} / 100
-                      </Badge>
-                    </div>
-                    <p className="mt-2 text-xs text-white/70">{score.rationale}</p>
-                    <div className="mt-3 flex flex-wrap gap-2 text-xs text-white/50">
-                      <span>Risk: {score.risk}</span>
-                      <span>Effort: {score.effort}</span>
-                      {score.recommended ? (
-                        <Badge className="bg-emerald-400/20 text-emerald-200">
-                          High potential
+                {results.scored.map((score) => {
+                  const sources = opportunityEvidence.get(score.title) ?? [];
+                  return (
+                    <motion.div
+                      key={score.title}
+                      className="rounded-2xl border border-white/10 bg-white/5 p-4"
+                      whileHover={{ y: -6, rotateX: 2, rotateY: -2 }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-white">{score.title}</p>
+                        <Badge
+                          className={cn(
+                            "bg-white/10 text-white/80",
+                            score.score >= 80 && "animate-pulse"
+                          )}
+                        >
+                          {score.score} / 100
                         </Badge>
-                      ) : null}
-                    </div>
-                    {sources.length ? (
-                      <div className="mt-3 space-y-1 text-xs text-white/60">
-                        <p className="text-[10px] uppercase tracking-wider text-white/40">
-                          Source signals
-                        </p>
-                        {sources.slice(0, 2).map((source) => (
-                          <a
-                            key={source.url}
-                            href={source.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="block truncate hover:text-white"
-                          >
-                            {source.title}
-                          </a>
-                        ))}
-                        {sources.length > 2 ? (
-                          <p className="text-[10px] text-white/40">
-                            +{sources.length - 2} more sources
-                          </p>
+                      </div>
+                      <p className="mt-2 text-xs text-white/70">{score.rationale}</p>
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-white/50">
+                        <span>Risk: {score.risk}</span>
+                        <span>Effort: {score.effort}</span>
+                        {score.recommended ? (
+                          <Badge className="bg-emerald-400/20 text-emerald-200">
+                            High potential
+                          </Badge>
                         ) : null}
                       </div>
-                    ) : null}
-                      );
-                    })()}
-                  </motion.div>
-                ))}
+                      {sources.length ? (
+                        <div className="mt-3 space-y-1 text-xs text-white/60">
+                          <p className="text-[10px] uppercase tracking-wider text-white/40">
+                            Source signals
+                          </p>
+                          {sources.slice(0, 2).map((source) => (
+                            <a
+                              key={source.url}
+                              href={source.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="block truncate hover:text-white"
+                            >
+                              {source.title}
+                            </a>
+                          ))}
+                          {sources.length > 2 ? (
+                            <p className="text-[10px] text-white/40">
+                              +{sources.length - 2} more sources
+                            </p>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </motion.div>
+                  );
+                })}
               </CardContent>
             </MotionCard>
           </motion.div>
