@@ -1,21 +1,9 @@
-import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-body",
-});
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-display",
-});
-
-export const metadata: Metadata = {
-  title: "Public Mood Radar Pro",
+export const metadata = {
+  title: "Public Mood Radar for Creators",
   description:
-    "Understand what the public is really feeling — in real time.",
+    "Creator-focused mood and trend signals with clear provenance.",
 };
 
 export default function RootLayout({
@@ -24,8 +12,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.variable} ${playfair.variable}`}>
+    <html lang="en">
+      <body className="min-h-screen bg-background text-foreground">
         {children}
       </body>
     </html>

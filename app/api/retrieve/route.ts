@@ -69,6 +69,15 @@ function dedupeSnippets(items: Snippet[]) {
   return result;
 }
 
+function isExcludedSource(url: string) {
+  const lower = url.toLowerCase();
+  return (
+    lower.includes("x.com/") ||
+    lower.includes("twitter.com/") ||
+    lower.includes("reddit.com/")
+  );
+}
+
 export async function POST(request: Request) {
   const body = (await request.json()) as RetrievePayload;
   const { topic, region, timeWindow, sourceFocus } = body;
@@ -88,7 +97,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const prompt = `Find latest news, discussions and public conversations about "${topic}" in "${region}" in the last ${timeWindow}. Source focus: ${sourceFocus}.
+  const prompt = `Find latest news, discussions, and public conversations about "${topic}" in "${region}" in the last ${timeWindow}. Source focus: ${sourceFocus}.
+Exclude X/Twitter and Reddit sources. Only include sources with verifiable public URLs.
 Return ONLY a strict JSON array of items with fields:
 [
   {
@@ -170,7 +180,9 @@ No extra text, no markdown.`;
     : [];
 
   const deduped = dedupeSnippets(
-    normalized.length ? normalized : fallbackResults
+    (normalized.length ? normalized : fallbackResults).filter(
+      (item) => !isExcludedSource(item.url)
+    )
   );
 
   if (!deduped.length) {
