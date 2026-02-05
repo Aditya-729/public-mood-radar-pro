@@ -178,6 +178,21 @@ export default function Home() {
     [stages]
   );
   const progressPercent = Math.round((completedCount / stages.length) * 100);
+  const evidenceSignals = results.normalized.length
+    ? results.normalized
+    : results.signals;
+  const opportunityEvidence = useMemo(() => {
+    const byTitle = new Map<string, Signal[]>();
+    results.opportunities.forEach((opportunity) => {
+      const unique = new Map<string, Signal>();
+      opportunity.evidenceIndexes.forEach((index) => {
+        const signal = evidenceSignals[index];
+        if (signal?.url) unique.set(signal.url, signal);
+      });
+      byTitle.set(opportunity.title, Array.from(unique.values()));
+    });
+    return byTitle;
+  }, [evidenceSignals, results.opportunities]);
 
   const setStageStatus = useCallback((stageKey: StageKey, status: StageStatus) => {
     setStages((prev) =>
@@ -593,6 +608,9 @@ export default function Home() {
                     className="rounded-2xl border border-white/10 bg-white/5 p-4"
                     whileHover={{ y: -6, rotateX: 2, rotateY: -2 }}
                   >
+                    {(() => {
+                      const sources = opportunityEvidence.get(opportunity.title) ?? [];
+                      return (
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-semibold text-white">
                         {opportunity.title}
@@ -607,6 +625,31 @@ export default function Home() {
                     <div className="mt-3 text-xs text-white/50">
                       {opportunity.platformFit} · {opportunity.audienceAngle}
                     </div>
+                    {sources.length ? (
+                      <div className="mt-3 space-y-1 text-xs text-white/60">
+                        <p className="text-[10px] uppercase tracking-wider text-white/40">
+                          Source signals
+                        </p>
+                        {sources.slice(0, 2).map((source) => (
+                          <a
+                            key={source.url}
+                            href={source.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block truncate hover:text-white"
+                          >
+                            {source.title}
+                          </a>
+                        ))}
+                        {sources.length > 2 ? (
+                          <p className="text-[10px] text-white/40">
+                            +{sources.length - 2} more sources
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : null}
+                      );
+                    })()}
                   </motion.div>
                 ))}
                 {results.gaps.map((gap) => (
@@ -651,6 +694,9 @@ export default function Home() {
                     className="rounded-2xl border border-white/10 bg-white/5 p-4"
                     whileHover={{ y: -6, rotateX: 2, rotateY: -2 }}
                   >
+                    {(() => {
+                      const sources = opportunityEvidence.get(score.title) ?? [];
+                      return (
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-semibold text-white">{score.title}</p>
                       <Badge
@@ -672,6 +718,31 @@ export default function Home() {
                         </Badge>
                       ) : null}
                     </div>
+                    {sources.length ? (
+                      <div className="mt-3 space-y-1 text-xs text-white/60">
+                        <p className="text-[10px] uppercase tracking-wider text-white/40">
+                          Source signals
+                        </p>
+                        {sources.slice(0, 2).map((source) => (
+                          <a
+                            key={source.url}
+                            href={source.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block truncate hover:text-white"
+                          >
+                            {source.title}
+                          </a>
+                        ))}
+                        {sources.length > 2 ? (
+                          <p className="text-[10px] text-white/40">
+                            +{sources.length - 2} more sources
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : null}
+                      );
+                    })()}
                   </motion.div>
                 ))}
               </CardContent>
