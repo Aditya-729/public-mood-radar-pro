@@ -179,11 +179,9 @@ No extra text, no markdown.`;
         .filter((item: Snippet) => item.title && item.url)
     : [];
 
-  const deduped = dedupeSnippets(
-    (normalized.length ? normalized : fallbackResults).filter(
-      (item) => !isExcludedSource(item.url)
-    )
-  );
+  const combined = (normalized.length ? normalized : fallbackResults) as Snippet[];
+  const filtered = combined.filter((item: Snippet) => !isExcludedSource(item.url));
+  const deduped = dedupeSnippets(filtered);
 
   if (!deduped.length) {
     return NextResponse.json(
